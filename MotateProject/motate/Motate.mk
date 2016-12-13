@@ -101,7 +101,18 @@ CPPFLAGS += -Wuninitialized -Wno-unknown-pragmas -Wfloat-equal -Wundef
 CPPFLAGS += -Wshadow -Wpointer-arith -Wwrite-strings
 #CPPFLAGS += -Wsign-compare -Waggregate-return -Wmissing-declarations
 CPPFLAGS += -Wformat -Wmissing-format-attribute -Wno-deprecated-declarations
-CPPFLAGS += -Wredundant-decls -Wlong-long
+CPPFLAGS += -Wredundant-decls -Wlong-long -fpermissive
+
+#freebsd  found:
+#                 from ../Motate/MotateProject/motate/Atmel_sams70/SamUSB.cpp:31:
+#../Motate/MotateProject/motate/MotateUSB.h: In member function 'void Motate::USBDevice<interfaceTypes>::handleConnectionStateChanged()':
+#../Motate/MotateProject/motate/MotateUSB.h:398:75: error: there are no arguments to 'isConnected' that depend on a template parameter, so a declaration of 'isConnected' must be available [-fpermissive]
+#             _mixins_type::handleConnectionStateChangedInMixin(isConnected());
+#                                                                           ^
+#../Motate/MotateProject/motate/MotateUSB.h:398:75: note: (if you use '-fpermissive', G++ will accept your code, but allowing the use of an undeclared name is deprecated)
+#gmake: *** [../Motate/MotateProject/motate/Motate.mk:474: build/TestQuadratic-gquadratic-b/motate/Atmel_sams70/SamUSB.o] Error 1
+
+CPPFLAGS +=  -fpermissive
 #CPPFLAGS += -Winline
 #CPPFLAGS += -Wmissing-noreturn -Wpacked
 #CPPFLAGS += -Wconversion
@@ -293,6 +304,16 @@ OBJCOPY = $(TOOLS_FULLPATH)/$(CROSS_COMPILE)-objcopy
 GDB     = $(TOOLS_FULLPATH)/$(CROSS_COMPILE)-gdb
 GDB_PY  = $(TOOLS_FULLPATH)/$(CROSS_COMPILE)-gdb-py
 NM      = $(TOOLS_FULLPATH)/$(CROSS_COMPILE)-nm
+#freebsd has a working gcc-arm use them
+CC      = arm-none-eabi-gcc
+CXX     = arm-none-eabi-g++
+LD      = arm-none-eabi-gcc-ld
+AR      = arm-none-eabi-gcc-ar
+SIZE    = arm-none-eabi-gcc-size
+STRIP   = arm-none-eabi-gcc-strip
+OBJCOPY = arm-none-eabi-gcc-objcopy
+GDB     = arm-none-eabi-gcc-gdb
+GDB_PY  = arm-none-eabi-gdb-py
 
 
 ifneq ($(NOT_IN_GIT),1)
@@ -399,8 +420,9 @@ $(eval $(DEVICE_RULES))
 tools: | $(TOOLS_PATH)/$(TOOLS_SUBPATH)/bin
 
 $(TOOLS_PATH)/$(TOOLS_SUBPATH)/bin:
-	@echo Installing the necessary tools...
-	cd ${TOOLS_PATH} && make "ARCH=gcc-${CROSS_COMPILE}"
+	@echo not Installing the necessary tools...
+	#make is not portable; if you mean gmake on your system instead
+	#cd ${TOOLS_PATH} && make "ARCH=gcc-${CROSS_COMPILE}"
 
 OUTDIR = $(OBJ)
 

@@ -34,10 +34,10 @@
 PROJECTS = $(wildcard ./demos/*)
 
 all: ${PROJECTS}
-	for project_name in $^; do { make -C "$$project_name"; } ; done
+	for project_name in $^; do { gmake -C "$$project_name"; } ; done
 
 clean: ${PROJECTS}
-	for project_name in $^; do { make -C "$$project_name" clean; } ; done
+	for project_name in $^; do { gmake -C "$$project_name" clean; } ; done
 
 PHONY: none
 

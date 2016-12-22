@@ -436,16 +436,16 @@ namespace Motate {
                     NVIC_SetPriority(spiIRQ(), 0);
                 }
                 else if (interrupts & SPIInterrupt::PriorityHigh) {
-                    NVIC_SetPriority(spiIRQ(), 3);
+                    NVIC_SetPriority(spiIRQ(), 1);
                 }
                 else if (interrupts & SPIInterrupt::PriorityMedium) {
-                    NVIC_SetPriority(spiIRQ(), 7);
+                    NVIC_SetPriority(spiIRQ(), 2);
                 }
                 else if (interrupts & SPIInterrupt::PriorityLow) {
-                    NVIC_SetPriority(spiIRQ(), 11);
+                    NVIC_SetPriority(spiIRQ(), 3);
                 }
                 else if (interrupts & SPIInterrupt::PriorityLowest) {
-                    NVIC_SetPriority(spiIRQ(), 15);
+                    NVIC_SetPriority(spiIRQ(), 4);
                 }
 
                 NVIC_EnableIRQ(spiIRQ());
@@ -576,18 +576,23 @@ namespace Motate {
         // start transfer of message
         bool startTransfer(uint8_t *tx_buffer, uint8_t *rx_buffer, uint16_t size) {
             bool is_setup = false;
+            dma()->setInterrupts(Interrupt::Off);
             if (rx_buffer != nullptr) {
-                const bool handle_interrupts = true;
+                const bool handle_interrupts = false;
                 const bool include_next = false;
                 is_setup = dma()->startRXTransfer(rx_buffer, size, handle_interrupts, include_next);
                 if (!is_setup) { return false; } // fail early
             }
             if (tx_buffer != nullptr) {
-                const bool handle_interrupts = true;
+                const bool handle_interrupts = false;
                 const bool include_next = false;
                 is_setup = dma()->startTXTransfer(tx_buffer, size, handle_interrupts, include_next);
             }
-            if (is_setup) { enable(); }
+            if (is_setup) {
+                enable();
+                //dma()->enable();
+                dma()->setInterrupts(Interrupt::OnTxTransferDone | Interrupt::OnRxTransferDone);
+            }
             return is_setup;
         }
 #endif // CAN_SPI_PDC_DMA
